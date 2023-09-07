@@ -1,0 +1,566 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model account_centers {
+  id         String    @id @db.VarChar(255)
+  account_id String    @db.VarChar(255)
+  lat        Float?
+  long       Float?
+  address    Json?
+  area       String?   @db.VarChar(255)
+  city       String    @db.VarChar(255)
+  country    String    @db.VarChar(255)
+  email      Json?
+  phone      Json?
+  timing     String[]  @db.VarChar(255)
+  state      String?   @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.VarChar(255)
+  updated_by String?   @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model accounts {
+  id                  String    @id @db.VarChar(255)
+  business_name       String    @unique @db.VarChar(255)
+  contact_name        String?   @db.VarChar(255)
+  city                String    @db.VarChar(255)
+  country             String    @db.VarChar(255)
+  sub_domain          String    @unique @db.VarChar(255)
+  phone               Json?
+  email               Json?
+  has_multiple_center Boolean?  @default(false)
+  state               String?   @db.VarChar(255)
+  type                String    @db.VarChar(255)
+  source              String    @db.VarChar(255)
+  created_at          DateTime  @db.Timestamptz(6)
+  updated_at          DateTime? @db.Timestamptz(6)
+  deleted_at          DateTime? @db.Timestamptz(6)
+  created_by          String?   @db.VarChar(255)
+  updated_by          String?   @db.VarChar(255)
+  deleted_by          String?   @db.VarChar(255)
+}
+
+model center_courses {
+  id                 String                    @id @db.VarChar(255)
+  account_id         String                    @db.VarChar(255)
+  center_id          String                    @db.VarChar(255)
+  name               String                    @db.VarChar(255)
+  center_subject_ids Json?
+  pricing            Json?
+  state              enum_center_courses_state
+  created_at         DateTime?                 @db.Timestamptz(6)
+  updated_at         DateTime?                 @db.Timestamptz(6)
+  deleted_at         DateTime?                 @db.Timestamptz(6)
+  created_by         String?                   @db.VarChar(255)
+  updated_by         String?                   @db.VarChar(255)
+  deleted_by         String?                   @db.VarChar(255)
+}
+
+model center_employees {
+  id               String                      @db.VarChar(255)
+  account_id       String                      @db.VarChar(255)
+  center_id        String                      @db.VarChar(255)
+  user_id          String                      @db.VarChar(255)
+  role_id          String                      @default("all_access") @db.VarChar(255)
+  ug_qualification String?                     @db.VarChar(255)
+  experience       String?                     @db.VarChar(255)
+  image_url        Json?
+  teaching_since   Json?
+  notes            String?
+  state            enum_center_employees_state @default(active)
+  created_at       DateTime                    @db.Timestamptz(6)
+  updated_at       DateTime?                   @db.Timestamptz(6)
+  deleted_at       DateTime?                   @db.Timestamptz(6)
+  created_by       String?                     @db.VarChar(255)
+  updated_by       String?                     @db.VarChar(255)
+  deleted_by       String?                     @db.VarChar(255)
+
+  @@id([id, account_id, center_id])
+  @@unique([account_id, user_id], map: "center_employees_account_id_user_id")
+}
+
+model center_exams {
+  id                String                  @id @db.VarChar(255)
+  account_id        String                  @db.VarChar(255)
+  center_id         String                  @db.VarChar(255)
+  name              String                  @db.VarChar(255)
+  series            Int                     @db.SmallInt
+  questions         Json?
+  center_subject_id String?                 @db.VarChar(255)
+  center_course_id  String?                 @db.VarChar(255)
+  duration          Int?                    @db.SmallInt
+  start_datetime    DateTime?               @db.Timestamptz(6)
+  close_datetime    DateTime?               @db.Timestamptz(6)
+  closed_by         String?                 @db.VarChar(255)
+  total_marks       Int?                    @db.SmallInt
+  make_random       Boolean?                @default(false)
+  meta              Json?
+  exam_settings_id  String?                 @db.VarChar(255)
+  score_settings    Json                    @default("\"[{'order':1, 'field':'has_negative'}]\"")
+  state             enum_center_exams_state @default(inactive)
+  created_at        DateTime?               @db.Timestamptz(6)
+  updated_at        DateTime?               @db.Timestamptz(6)
+  deleted_at        DateTime?               @db.Timestamptz(6)
+  created_by        String?                 @db.VarChar(255)
+  updated_by        String?                 @db.VarChar(255)
+  deleted_by        String?                 @db.VarChar(255)
+}
+
+model center_expense_list {
+  id         String                          @id @db.VarChar(255)
+  account_id String                          @db.VarChar(255)
+  center_id  String                          @db.VarChar(255)
+  name       String                          @db.VarChar(255)
+  state      enum_center_expense_list_state?
+  created_at DateTime                        @db.Timestamptz(6)
+  updated_at DateTime?                       @db.Timestamptz(6)
+  deleted_at DateTime?                       @db.Timestamptz(6)
+  created_by String?                         @db.VarChar(255)
+  updated_by String?                         @db.VarChar(255)
+  deleted_by String?                         @db.VarChar(255)
+}
+
+model center_expenses {
+  id              String                               @id @db.VarChar(255)
+  account_id      String                               @db.VarChar(255)
+  center_id       String                               @db.VarChar(255)
+  expense_id      String                               @db.VarChar(255)
+  amount          Float
+  mode_of_payment enum_center_expenses_mode_of_payment
+  notes           String?
+  expense_date    DateTime?                            @db.Timestamptz(6)
+  created_at      DateTime                             @db.Timestamptz(6)
+  updated_at      DateTime?                            @db.Timestamptz(6)
+  deleted_at      DateTime?                            @db.Timestamptz(6)
+  created_by      String?                              @db.VarChar(255)
+  updated_by      String?                              @db.VarChar(255)
+  deleted_by      String?                              @db.VarChar(255)
+}
+
+model center_leads {
+  id          String                  @db.VarChar(255)
+  account_id  String                  @db.VarChar(255)
+  center_id   String                  @db.VarChar(255)
+  user_id     String                  @db.VarChar(255)
+  source      String?                 @db.VarChar(255)
+  score       String?                 @db.VarChar(255)
+  student_id  String?                 @db.VarChar(255)
+  referred_by String?                 @db.VarChar(255)
+  state       enum_center_leads_state @default(active)
+  created_at  DateTime                @db.Timestamptz(6)
+  updated_at  DateTime?               @db.Timestamptz(6)
+  deleted_at  DateTime?               @db.Timestamptz(6)
+  created_by  String?                 @db.VarChar(255)
+  updated_by  String?                 @db.VarChar(255)
+  deleted_by  String?                 @db.VarChar(255)
+
+  @@id([id, account_id, center_id])
+  @@unique([account_id, user_id], map: "center_leads_account_id_user_id")
+}
+
+model center_questions {
+  id                 String                             @id @db.VarChar(255)
+  account_id         String                             @db.VarChar(255)
+  center_id          String                             @db.VarChar(255)
+  center_subject_id  String?                            @db.VarChar(255)
+  question           String
+  temp_id            String?                            @db.VarChar(255)
+  club_question      String?                            @db.VarChar(255)
+  is_html            Boolean?                           @default(false)
+  questionType       enum_center_questions_questionType
+  ques_explanation   String?
+  ques_direction     String?
+  options            Json
+  answer_explanation String?                            @db.VarChar(255)
+  reference_ques_id  String?                            @db.VarChar(255)
+  meta               Json?
+  state              String?                            @db.VarChar(255)
+  created_at         DateTime                           @db.Timestamptz(6)
+  updated_at         DateTime?                          @db.Timestamptz(6)
+  deleted_at         DateTime?                          @db.Timestamptz(6)
+  created_by         String                             @db.VarChar(255)
+  updated_by         String?                            @db.VarChar(255)
+  deleted_by         String?                            @db.VarChar(255)
+}
+
+model center_roles {
+  id         String    @id @db.VarChar(255)
+  account_id String    @db.VarChar(255)
+  center_id  String    @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.VarChar(255)
+  updated_by String?   @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model center_settings {
+  id                      Int       @id @default(autoincrement())
+  account_id              String    @db.VarChar(255)
+  center_id               String    @db.VarChar(255)
+  feature_id              String[]  @db.VarChar(255)
+  subscription_plan_id    String?   @db.VarChar(255)
+  subscription_status     String?   @db.VarChar(255)
+  billing_cycle           String?   @db.VarChar(255)
+  enabled_date            DateTime  @db.Timestamptz(6)
+  subscription_start_date DateTime  @db.Timestamptz(6)
+  subscription_end_date   DateTime  @db.Timestamptz(6)
+  cost_per_cycle          Float?
+  cost_authorised_by      String?   @db.VarChar(255)
+  tax                     Json
+  grace_period            Int
+  created_at              DateTime  @db.Timestamptz(6)
+  updated_at              DateTime  @db.Timestamptz(6)
+  deleted_at              DateTime? @db.Timestamptz(6)
+  created_by              String    @db.VarChar(255)
+  updated_by              String    @db.VarChar(255)
+  deleted_by              String?   @db.VarChar(255)
+}
+
+model center_student_orders {
+  id           String                           @id @db.VarChar(255)
+  account_id   String                           @db.VarChar(255)
+  center_id    String                           @db.VarChar(255)
+  student_id   String                           @db.VarChar(255)
+  course_id    String?                          @db.VarChar(255)
+  course_info  Json?
+  subject_id   Json?
+  subject_info Json?
+  exam_id      String?                          @db.VarChar(255)
+  exam_info    Json?
+  is_specific  Boolean?                         @default(false)
+  state        enum_center_student_orders_state @default(initialised)
+  amount       Float?
+  taxes        Json?
+  created_at   DateTime                         @db.Timestamptz(6)
+  updated_at   DateTime?                        @db.Timestamptz(6)
+  deleted_at   DateTime?                        @db.Timestamptz(6)
+  created_by   String?                          @db.VarChar(255)
+  updated_by   String?                          @db.VarChar(255)
+  deleted_by   String?                          @db.VarChar(255)
+}
+
+model center_student_payments {
+  id         String                             @id @db.VarChar(255)
+  account_id String                             @db.VarChar(255)
+  center_id  String                             @db.VarChar(255)
+  student_id String?                            @db.VarChar(255)
+  order_id   String                             @db.VarChar(255)
+  state      enum_center_student_payments_state @default(active)
+  created_at DateTime                           @db.Timestamptz(6)
+  updated_at DateTime?                          @db.Timestamptz(6)
+  deleted_at DateTime?                          @db.Timestamptz(6)
+  created_by String?                            @db.VarChar(255)
+  updated_by String?                            @db.VarChar(255)
+  deleted_by String?                            @db.VarChar(255)
+}
+
+model center_student_transactions {
+  id             String                                       @id @db.VarChar(255)
+  account_id     String                                       @db.VarChar(255)
+  center_id      String                                       @db.VarChar(255)
+  order_id       String                                       @db.VarChar(255)
+  transaction_id String?                                      @db.VarChar(255)
+  transacter     enum_center_student_transactions_transacter?
+  amount         String?                                      @db.VarChar(255)
+  state          enum_center_student_transactions_state       @default(initialised)
+  created_at     DateTime                                     @db.Timestamptz(6)
+  updated_at     DateTime?                                    @db.Timestamptz(6)
+  deleted_at     DateTime?                                    @db.Timestamptz(6)
+  created_by     String?                                      @db.VarChar(255)
+  updated_by     String?                                      @db.VarChar(255)
+  deleted_by     String?                                      @db.VarChar(255)
+}
+
+model center_students {
+  id           String                     @db.VarChar(255)
+  account_id   String                     @db.VarChar(255)
+  center_id    String                     @db.VarChar(255)
+  lead_id      String?                    @db.VarChar(255)
+  user_id      String                     @db.VarChar(255)
+  referred_by  String?                    @db.VarChar(255)
+  converted_by String?                    @db.VarChar(255)
+  state        enum_center_students_state @default(active)
+  created_at   DateTime                   @db.Timestamptz(6)
+  updated_at   DateTime?                  @db.Timestamptz(6)
+  deleted_at   DateTime?                  @db.Timestamptz(6)
+  created_by   String?                    @db.VarChar(255)
+  updated_by   String?                    @db.VarChar(255)
+  deleted_by   String?                    @db.VarChar(255)
+
+  @@id([id, account_id, center_id])
+  @@unique([account_id, user_id], map: "center_students_account_id_user_id")
+}
+
+model center_subjects {
+  id         String                     @id @db.VarChar(255)
+  account_id String                     @db.VarChar(255)
+  center_id  String                     @db.VarChar(255)
+  name       String                     @db.VarChar(255)
+  subject_id String?                    @db.VarChar(255)
+  pricing    Json?
+  state      enum_center_subjects_state
+  created_at DateTime?                  @db.Timestamptz(6)
+  updated_at DateTime?                  @db.Timestamptz(6)
+  deleted_at DateTime?                  @db.Timestamptz(6)
+  created_by String?                    @db.VarChar(255)
+  updated_by String?                    @db.VarChar(255)
+  deleted_by String?                    @db.VarChar(255)
+}
+
+model course_batches {
+  id          String    @id @db.VarChar(255)
+  account_id  String    @db.VarChar(255)
+  center_id   String    @db.VarChar(255)
+  course_id   String    @db.VarChar(255)
+  subject_id  String    @db.VarChar(255)
+  course_name String    @db.VarChar(255)
+  created_at  DateTime  @db.Timestamptz(6)
+  updated_at  DateTime  @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  created_by  String    @db.VarChar(255)
+  updated_by  String    @db.VarChar(255)
+  deleted_by  String?   @db.VarChar(255)
+}
+
+model course_subjects {
+  id          String    @id @db.VarChar(255)
+  account_id  String    @db.VarChar(255)
+  center_id   String    @db.VarChar(255)
+  course_id   String    @db.VarChar(255)
+  course_name String    @db.VarChar(255)
+  created_at  DateTime  @db.Timestamptz(6)
+  updated_at  DateTime  @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  created_by  String    @db.VarChar(255)
+  updated_by  String    @db.VarChar(255)
+  deleted_by  String?   @db.VarChar(255)
+}
+
+model employees {
+  user_id          String    @id @db.VarChar(255)
+  account_id       String    @db.VarChar(255)
+  center_id        String    @db.VarChar(255)
+  ug_qualification String?   @db.VarChar(255)
+  experience       String?   @db.VarChar(255)
+  image_url        Json?
+  teaching_since   Json?
+  notes            String?
+  state            String    @db.VarChar(255)
+  created_at       DateTime  @db.Timestamptz(6)
+  updated_at       DateTime? @db.Timestamptz(6)
+  deleted_at       DateTime? @db.Timestamptz(6)
+  created_by       String?   @db.VarChar(255)
+  updated_by       String?   @db.VarChar(255)
+  deleted_by       String?   @db.VarChar(255)
+}
+
+model exam_settings {
+  id                  String    @id @db.VarChar(255)
+  name                String    @db.VarChar(255)
+  immediate_report    Boolean?  @default(true)
+  allow_retake        Boolean   @default(true)
+  strict_start_time   Boolean?  @default(false)
+  strict_end_time     Boolean?  @default(false)
+  strict_duration     Boolean?  @default(false)
+  verify_every_answer Boolean?  @default(false)
+  createdAt           DateTime  @db.Timestamptz(6)
+  updatedAt           DateTime  @db.Timestamptz(6)
+  deletedAt           DateTime? @db.Timestamptz(6)
+}
+
+model features {
+  id         String    @id @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime  @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.VarChar(255)
+  updated_by String    @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model students {
+  id         String    @id @db.VarChar(255)
+  name       String?   @db.VarChar(255)
+  phone      Json
+  email      Json?
+  dob        DateTime? @db.Timestamptz(6)
+  image_URL  String?   @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String?   @db.VarChar(255)
+  updated_by String?   @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model subjects {
+  id         String    @id @db.VarChar(255)
+  course_id  String?   @db.VarChar(255)
+  name       String    @unique @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime  @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.VarChar(255)
+  updated_by String?   @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model subscriptions {
+  id         String    @id @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  features   String[]  @db.VarChar(255)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime  @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  created_by String    @db.VarChar(255)
+  updated_by String    @db.VarChar(255)
+  deleted_by String?   @db.VarChar(255)
+}
+
+model susbcription_cycle {
+  id              String    @id @db.VarChar(255)
+  subscription_id String    @db.VarChar(255)
+  price           Float
+  cycle           Int
+  created_at      DateTime  @db.Timestamptz(6)
+  updated_at      DateTime  @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+  created_by      String    @db.VarChar(255)
+  updated_by      String    @db.VarChar(255)
+  deleted_by      String?   @db.VarChar(255)
+}
+
+model users {
+  id            String           @id @db.VarChar(255)
+  name          String           @db.VarChar(255)
+  phone         Json             @unique(map: "users_phone")
+  email         Json?            @unique(map: "users_email")
+  dob           DateTime?        @db.Timestamptz(6)
+  image_URL     String?          @db.VarChar(255)
+  password      String?          @db.VarChar(255)
+  password_salt String?          @db.VarChar(255)
+  social        Json?
+  extra         String?
+  state         enum_users_state @default(active)
+  created_at    DateTime         @db.Timestamptz(6)
+  updated_at    DateTime?        @db.Timestamptz(6)
+  deleted_at    DateTime?        @db.Timestamptz(6)
+  created_by    String?          @db.VarChar(255)
+  updated_by    String?          @db.VarChar(255)
+  deleted_by    String?          @db.VarChar(255)
+}
+
+enum enum_center_courses_state {
+  active
+  inactive
+}
+
+enum enum_center_employees_state {
+  active
+  inactive
+}
+
+enum enum_center_exams_state {
+  active
+  inactive
+  incomplete
+}
+
+enum enum_center_expense_list_state {
+  active
+  inactive
+}
+
+enum enum_center_expenses_mode {
+  cash
+  card
+  wallet
+}
+
+enum enum_center_expenses_mode_of_payment {
+  cash
+  card
+  wallet
+  online
+}
+
+enum enum_center_expenses_state {
+  active
+  inactive
+}
+
+enum enum_center_leads_state {
+  active
+  inactive
+}
+
+enum enum_center_questions_questionType {
+  bool
+  mcq
+  match
+}
+
+enum enum_center_student_orders_state {
+  demo
+  initialised
+  partial
+  pending_confirmation @map("pending confirmation")
+  completed
+  incomplete
+  failed
+}
+
+enum enum_center_student_payments_state {
+  active
+  inactive
+}
+
+enum enum_center_student_transactions_state {
+  initialised
+  partial
+  pending_confirmation @map("pending confirmation")
+  completed
+  incomplete
+  failed
+}
+
+enum enum_center_student_transactions_transacter {
+  wallet
+  net_banking @map("net banking")
+  card
+  cash
+  cheque
+}
+
+enum enum_center_students_state {
+  active
+  inactive
+}
+
+enum enum_center_subjects_state {
+  active
+  inactive
+}
+
+enum enum_students_state {
+  active
+  inactive
+}
+
+enum enum_users_state {
+  active
+  inactive
+}
